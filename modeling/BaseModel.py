@@ -27,15 +27,15 @@ class BaseModel(nn.Module):
     def save_pretrained(self, save_dir):
         torch.save(self.model.state_dict(), os.path.join(save_dir, "model_state_dict.pt"))
 
-    def from_pretrained(self, pretrained, 
+    def from_pretrained(self, pretrained, filename: str = "biomedparse_v1.pt",
                         local_dir: str = "./pretrained", config_dir: str = "./configs"):
         if pretrained.startswith("hf_hub:"):
             hub_name = pretrained.split(":")[1]
-            huggingface_hub.hf_hub_download(hub_name, filename="biomedparse_v1.pt", 
+            huggingface_hub.hf_hub_download(hub_name, filename=filename, 
                                             local_dir=local_dir)
             huggingface_hub.hf_hub_download(hub_name, filename="config.yaml", 
                                             local_dir=config_dir)
-            load_dir = os.path.join(local_dir, "biomedparse_v1.pt")
+            load_dir = os.path.join(local_dir, filename)
         else:
             load_dir = pretrained
         
