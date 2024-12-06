@@ -18,6 +18,8 @@ This repository hosts the code and resources for the paper **"A Foundation Model
 git clone https://github.com/microsoft/BiomedParse.git
 ```
 
+[Notice] If inference_utils/target_dist.json is not cloned correctly, you can either use git lfs pull or change the content manually. We will refine the process in the future.
+
 ### Conda Environment Setup
 #### Option 1: Directly build the conda environment
 Under the project directory, run
