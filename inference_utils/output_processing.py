@@ -2,8 +2,7 @@ import json
 from scipy import stats
 import numpy as np
 
-
-target_dist = json.load(open("inference_utils/target_dist.json"))
+import huggingface_hub
 
 
 def check_mask_stats(img, mask, modality_type, target):
@@ -11,6 +10,9 @@ def check_mask_stats(img, mask, modality_type, target):
     # mask: np.array, shape=(H, W, 1) mask probability scaled to [0,255] with pixel values in [0, 255]
     # modality_type: str, see target_dist.json for the list of modality types
     # target: str, see target_dist.json for the list of targets
+    
+    huggingface_hub.hf_hub_download('microsoft/BiomedParse', filename='target_dist.json', local_dir='./inference_utils')
+    target_dist = json.load(open("inference_utils/target_dist.json"))
     
     if modality_type not in target_dist:
         raise ValueError(f"Currently support modality types: {list(target_dist.keys())}")
