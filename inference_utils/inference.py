@@ -19,7 +19,7 @@ from PIL import Image
 import random
 
 t = []
-t.append(transforms.Resize(1024, interpolation=Image.BICUBIC))
+t.append(transforms.Resize((1024, 1024), interpolation=Image.BICUBIC))
 transform = transforms.Compose(t)
 #metadata = MetadataCatalog.get('coco_2017_train_panoptic')
 all_classes = ['background'] + [name.replace('-other','').replace('-merged','') 
@@ -37,12 +37,11 @@ from .output_processing import mask_stats, combine_masks
 @torch.no_grad()
 def interactive_infer_image(model, image, prompts):
 
-    image_ori = transform(image)
-    #mask_ori = image['mask']
-    width = image_ori.size[0]
-    height = image_ori.size[1]
-    image_ori = np.asarray(image_ori)
-    image = torch.from_numpy(image_ori.copy()).permute(2,0,1).cuda()
+    image_resize = transform(image)
+    width = image.size[0]
+    height = image.size[1]
+    image_resize = np.asarray(image_resize)
+    image = torch.from_numpy(image_resize.copy()).permute(2,0,1).cuda()
 
     data = {"image": image, 'text': prompts, "height": height, "width": width}
     
@@ -72,7 +71,8 @@ def interactive_infer_image(model, image, prompts):
     pred_class = results['pred_logits'][0][matched_id].max(dim=-1)[1]
 
     # interpolate mask to ori size
-    pred_mask_prob = F.interpolate(pred_masks_pos[None,], image_size[-2:], mode='bilinear')[0,:,:data['height'],:data['width']].sigmoid().cpu().numpy()
+    pred_mask_prob = F.interpolate(pred_masks_pos[None,], (data['height'], data['width']), 
+                                   mode='bilinear')[0,:,:data['height'],:data['width']].sigmoid().cpu().numpy()
     pred_masks_pos = (1*(pred_mask_prob > 0.5)).astype(np.uint8)
     
     return pred_mask_prob
