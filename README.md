@@ -9,6 +9,7 @@ This repository hosts the code and resources for the paper **"A Foundation Model
 ![Example Predictions](assets/readmes/biomedparse_prediction_examples.png)
 
 ## News
+- Dec. 5, 2024: The loading process of target_dist.json is optimized by automatic downloading from HuggingFace.
 - Dec. 3, 2024: We added inference notebook examples in inference_example_RGB.ipynb and inference_example_NIFTI.ipynb
 - Nov. 22, 2024: We added negative prediction p-value example in inference_example_DICOM.ipynb
 - Nov. 18, 2024: BiomedParse is officially online in [*Nature Methods*](https://aka.ms/biomedparse-paper)!
@@ -18,7 +19,7 @@ This repository hosts the code and resources for the paper **"A Foundation Model
 git clone https://github.com/microsoft/BiomedParse.git
 ```
 
-[Notice] If inference_utils/target_dist.json is not cloned correctly, you can either use git lfs pull or change the content manually. We will refine the process in the future.
+[Notice] If inference_utils/target_dist.json is not cloned correctly, it will be automatically loaded from HuggingFace when needed.
 
 ### Conda Environment Setup
 #### Option 1: Directly build the conda environment
