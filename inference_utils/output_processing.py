@@ -12,6 +12,7 @@ def check_mask_stats(img, mask, modality_type, target):
     # target: str, see target_dist.json for the list of targets
     
     huggingface_hub.hf_hub_download('microsoft/BiomedParse', filename='target_dist.json', local_dir='./inference_utils')
+    huggingface_hub.hf_hub_download('microsoft/BiomedParse', filename="config.yaml", local_dir="./configs")
     target_dist = json.load(open("inference_utils/target_dist.json"))
     
     if modality_type not in target_dist:

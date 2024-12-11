@@ -49,15 +49,9 @@ pip install -r assets/requirements/requirements.txt
 BiomedParseData was created from preprocessing publicly available biomedical image segmentation datasets. Check a subset of our processed datasets on HuggingFace: https://huggingface.co/datasets/microsoft/BiomedParseData. For the source datasets, please check the details here: [BiomedParseData](assets/readmes/DATASET.md). As a quick start, we've samples a tiny demo dataset at biomedparse_datasets/BiomedParseData-Demo
 
 ## Model Checkpoints
-We host our model checkpoints on HuggingFace here: https://huggingface.co/microsoft/BiomedParse.
+We host our model checkpoints on HuggingFace here: https://huggingface.co/microsoft/BiomedParse. See example code below on model loading.
 
-Step 1. Create pretrained model folder
-```
-mkdir pretrained
-```
-Step 2. Download model checkpoint and put the model in the pretrained folder when running the code. Change file name to biomed_parse.pt
-
-Expect future updates of the model as we are making it more robust and powerful based on feedbacks from the community. We recomment using the latest version of the model.
+Please expect future updates of the model as we are making it more robust and powerful based on feedbacks from the community. We recomment using the latest version of the model.
 
 ## Running Inference with BiomedParse
 
@@ -74,7 +68,9 @@ To perform inference with BiomedParse, use the provided example code and resourc
 
 We’ve included sample notebooks to guide you through running inference with BiomedParse:
 
+- **RGB Inference Example**: Check out the `inference_examples_RGB.ipynb` notebook for example using normal RGB images, including Pathology, X-ray, Ultrasound, Endoscopy, Dermoscopy, OCT, Fundus.
 - **DICOM Inference Example**: Check out the `inference_examples_DICOM.ipynb` notebook for example using DICOM images.
+- **NIFTI Inference Example**: Check out the `inference_examples_NIFTI.ipynb` notebook for example using NIFTI image slices.
 - You can also try a quick online demo: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/microsoft/BiomedParse/blob/main/inference_colab_demo.ipynb)
 
 ### Model Setup
@@ -87,6 +83,7 @@ from utilities.distributed import init_distributed
 from utilities.arguments import load_opt_from_config_files
 from utilities.constants import BIOMED_CLASSES
 from inference_utils.inference import interactive_infer_image
+from inference_utils.output_processing import check_mask_stats
 import numpy as np
 
 # Build model config
@@ -124,12 +121,14 @@ for i, pred in enumerate(pred_mask):
     gt = gt_masks[i]
     dice = (1*(pred>0.5) & gt).sum() * 2.0 / (1*(pred>0.5).sum() + gt.sum())
     print(f'Dice score for {prompts[i]}: {dice:.4f}')
+    check_mask_stats(image, pred_mask[i]*255, 'X-Ray-Chest', text_prompt[i])
+    print(f'p-value for {prompts[i]}: {p_value:.4f}')
 ```
 
 
 Detection and recognition inference code are provided in `inference_utils/output_processing.py`.
 
-- `check_mask_stats()`: Outputs p-value for model-predicted mask for detection.
+- `check_mask_stats()`: Outputs p-value for model-predicted mask for detection. Check the `inference_examples_RGB.ipynb` notebook.
 - `combine_masks()`: Combines predictions for non-overlapping masks.
 
 ## Finetune on Your Own Data

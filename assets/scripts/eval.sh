@@ -17,5 +17,5 @@ CUDA_VISIBLE_DEVICES=0 mpirun -n 1 python entry.py evaluate \
             FP16 True \
             WEIGHT True \
             STANDARD_TEXT_FOR_EVAL False \
-            RESUME_FROM pretrained/biomed_parse.pt \
+            RESUME_FROM pretrained/biomedparse_v1.pt \
             

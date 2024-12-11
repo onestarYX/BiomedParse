@@ -8,6 +8,7 @@ from utilities.constants import BIOMED_CLASSES
 import numpy as np
 
 from inference_utils.inference import interactive_infer_image
+from inference_utils.output_processing import check_mask_stats
 
 opt = load_opt_from_config_files(["configs/biomedparse_inference.yaml"])
 opt = init_distributed(opt)
@@ -42,3 +43,5 @@ for i, pred in enumerate(pred_mask):
     gt = gt_masks[i]
     dice = (1*(pred>0.5) & gt).sum() * 2.0 / (1*(pred>0.5).sum() + gt.sum())
     print(f'Dice score for {prompts[i]}: {dice:.4f}')
+    p_value = check_mask_stats(np.array(image), pred*255, 'Pathology', prompts[i])
+    print(f'p-value for {prompts[i]}: {p_value:.4f}')
