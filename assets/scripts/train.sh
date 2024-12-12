@@ -31,6 +31,7 @@ CUDA_VISIBLE_DEVICES=0 mpirun -n 1 python entry.py train \
             MODEL.DECODER.SPATIAL.ENABLED True \
             MODEL.DECODER.GROUNDING.ENABLED True \
             LOADER.SAMPLE_PROB prop \
+            BioMed.INPUT.RANDOM_ROTATE True \
             FIND_UNUSED_PARAMETERS True \
             ATTENTION_ARCH.SPATIAL_MEMORIES 32 \
             MODEL.DECODER.SPATIAL.MAX_ITER 0 \

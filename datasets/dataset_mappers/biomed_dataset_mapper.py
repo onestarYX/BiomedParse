@@ -121,6 +121,7 @@ class BioMedDatasetMapper:
         max_token_num,
         tokenizer,
         binary_classes: bool,
+        rotate: bool,
     ):
         """
         NOTE: this interface is experimental.
@@ -153,6 +154,7 @@ class BioMedDatasetMapper:
         self.max_token_num = max_token_num
 
         self.binary_classes = binary_classes
+        self.rotate = rotate
 
     @classmethod
     def from_config(cls, cfg, is_train=True):
@@ -188,7 +190,8 @@ class BioMedDatasetMapper:
             "retrieval": retrieval,
             "max_token_num": max_token_num,
             "tokenizer": tokenizer,
-            "binary_classes": cfg['MODEL']['ENCODER']['BINARY_CLASSES']
+            "binary_classes": cfg['MODEL']['ENCODER']['BINARY_CLASSES'],
+            "rotate": cfg['INPUT']['RANDOM_ROTATE'],
         }
         return ret
 
@@ -212,6 +215,12 @@ class BioMedDatasetMapper:
 
         image, transforms = T.apply_transform_gens(self.tfm_gens, image)
         image_shape = image.shape[:2]  # h, w
+
+        rotate_time = 0
+        if self.is_train and self.rotate and random.random() < 0.5:
+            rotate_time = random.randint(1, 3)
+        if rotate_time > 0:
+            image = np.rot90(image, rotate_time)
 
         # Pytorch's dataloader is efficient on torch.Tensor due to shared-memory,
         # but not efficient on large generic data structures due to the use of pickle & mp.Queue.
@@ -252,6 +261,8 @@ class BioMedDatasetMapper:
                 m = 1 * (m > 0)
             m = m.astype(np.uint8)  # convert to np.uint8
             m = transforms.apply_segmentation(255*m[:,:,None])[:,:,0]
+            if rotate_time > 0:
+                m = np.rot90(m, rotate_time)
             masks_grd += [m]
             rand_id = random.randint(0, len(ann['sentences'])-1)
             texts_grd.append(ann['sentences'][rand_id]['raw'].lower())
@@ -320,6 +331,8 @@ class BioMedDatasetMapper:
 
                     m = m.astype(np.uint8)  # convert to np.uint8
                     m = transforms.apply_segmentation(m[:,:,None])[:,:,0]
+                    if rotate_time > 0:
+                        m = np.rot90(m, rotate_time)
                     masks_grd += [m]
                     # random select a sentence of a single annotation.
                     rand_index = random.randint(0, len(ann['sentences'])-1)
