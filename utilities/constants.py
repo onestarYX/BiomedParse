@@ -17,6 +17,21 @@ BIOMED_HIERARCHY = {'CT': {'abdomen': ['liver', 'left kidney', 'right kidney', '
                                    'transperineal': ['public symphysis', 'fetal head']},
                     'fundus': {'retinal': ['optic disc', 'optic cup', 'retinal vessel']}}
 
+BIOMED_OBJECTS = {'CT-Abdomen': ['postcava', 'aorta', 'right kidney', 'left kidney', 'duodenum', 'pancreas', 'liver', 'spleen', 'stomach', 'gallbladder', 'left adrenal gland', 'right adrenal gland', 'esophagus'], 
+ 'CT-Chest': ['nodule', 'COVID-19 infection', 'tumor'], 
+ 'CT-Liver': ['vessel', 'tumor'], 
+ 'MRI-Abdomen': ['aorta', 'postcava', 'right kidney', 'duodenum', 'left kidney', 'liver', 'pancreas', 'gallbladder', 'stomach', 'spleen', 'left adrenal gland', 'right adrenal gland', 'esophagus'], 
+ 'MRI-Cardiac': ['left heart ventricle', 'myocardium', 'right heart ventricle'], 
+ 'MRI-FLAIR-Brain': ['edema', 'tumor core'], 
+ 'MRI-T1-Gd-Brain': ['enhancing tumor', 'non-enhancing tumor'], 
+ 'Pathology': ['connective tissue cells', 'inflammatory cells', 'neoplastic cells', 'epithelial cells'], 
+ 'X-Ray-Chest': ['left lung', 'right lung'], 
+ 'Ultrasound-Cardiac': ['left heart atrium', 'left heart ventricle'], 
+ 'Endoscopy': ['neoplastic polyp', 'non-neoplastic polyp'], 
+ 'Fundus': ['optic cup', 'optic disc'], 
+ 'Dermoscopy': ['lesion'], 
+ 'OCT': ['edema']}
+
 
 COCO_PANOPTIC_CLASSES = ['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat', 'traffic light', 'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch', 'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone', 'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush', 'banner', 'blanket', 'bridge', 'cardboard', 'counter', 'curtain', 'door-stuff', 'floor-wood', 'flower', 'fruit', 'gravel', 'house', 'light', 'mirror-stuff', 'net', 'pillow', 'platform', 'playingfield', 'railroad', 'river', 'road', 'roof', 'sand', 'sea', 'shelf', 'snow', 'stairs', 'tent', 'towel', 'wall-brick', 'wall-stone', 'wall-tile', 'wall-wood', 'water-other', 'window-blind', 'window-other', 'tree-merged', 'fence-merged', 'ceiling-merged', 'sky-other-merged', 'cabinet-merged', 'table-merged', 'floor-other-merged', 'pavement-merged', 'mountain-merged', 'grass-merged', 'dirt-merged', 'paper-merged', 'food-other-merged', 'building-other-merged', 'rock-merged', 'wall-other-merged', 'rug-merged']
 

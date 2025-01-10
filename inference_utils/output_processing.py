@@ -11,9 +11,7 @@ def check_mask_stats(img, mask, modality_type, target):
     # modality_type: str, see target_dist.json for the list of modality types
     # target: str, see target_dist.json for the list of targets
     
-    huggingface_hub.hf_hub_download('microsoft/BiomedParse', filename='target_dist.json', local_dir='./inference_utils')
-    huggingface_hub.hf_hub_download('microsoft/BiomedParse', filename="config.yaml", local_dir="./configs")
-    target_dist = json.load(open("inference_utils/target_dist.json"))
+    target_dist = get_target_dist()
     
     if modality_type not in target_dist:
         raise ValueError(f"Currently support modality types: {list(target_dist.keys())}")
@@ -26,7 +24,7 @@ def check_mask_stats(img, mask, modality_type, target):
     ps = [stats.ks_1samp([ms[i]], stats.beta(param[0], param[1]).cdf).pvalue for i, param in enumerate(target_dist[modality_type][target])]
     p_value = np.prod(ps)
     
-    adj_p_value = p_value**0.24    # adjustment for four test products
+    adj_p_value = p_value**0.25    # adjustment for four test products
     
     return adj_p_value
     
@@ -72,7 +70,7 @@ def combine_masks(predicts):
     # discard targets with small areas
     discard_targets = []
     for target in predicts:
-        if combined_areas[target] < 0.6 * target_area[target]:
+        if combined_areas[target] < 0.5 * target_area[target]:
             discard_targets.append(target)
 
     # keep the most confident target
@@ -89,3 +87,8 @@ def combine_masks(predicts):
         masks[pred_target][index[0], index[1]] = 1
     
     return masks
+
+def get_target_dist():
+    huggingface_hub.hf_hub_download('microsoft/BiomedParse', filename='target_dist.json', local_dir='./inference_utils')
+    huggingface_hub.hf_hub_download('microsoft/BiomedParse', filename="config.yaml", local_dir="./configs")
+    return json.load(open("inference_utils/target_dist.json"))
