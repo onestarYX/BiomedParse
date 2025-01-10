@@ -9,6 +9,7 @@ This repository hosts the code and resources for the paper **"A Foundation Model
 ![Example Predictions](assets/readmes/biomedparse_prediction_examples.png)
 
 ## News
+- Jan. 9, 2025: Refined all object recognition script and added notebook with examples.
 - Dec. 12, 2024: Uploaded extra datasets for finetuning on [[`Data`](https://huggingface.co/datasets/microsoft/BiomedParseData)]. Added random rotation feature for training.
 - Dec. 5, 2024: The loading process of target_dist.json is optimized by automatic downloading from HuggingFace.
 - Dec. 3, 2024: We added inference notebook examples in inference_example_RGB.ipynb and inference_example_NIFTI.ipynb
