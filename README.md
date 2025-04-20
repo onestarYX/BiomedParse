@@ -232,14 +232,15 @@ source docker/data_env.sh
 Please cite our paper if you use the code, model, or data.
 
 ```bibtex
-@article{zhao2024biomedparse,
-  title = {A foundation model for joint segmentation, detection, and recognition of biomedical objects across nine modalities},
-  author = {Zhao, Theodore and Gu, Yu and Yang, Jianwei and Usuyama, Naoto and Lee, Ho Hin and Kiblawi, Sid and Naumann, Tristan and Gao, Jianfeng and Crabtree, Angela and Abel, Jacob and Moung-Wen, Christine and Piening, Brian and Bifulco, Carlo and Wei, Mu and Poon, Hoifung and Wang, Sheng},
-  journal = {Nature Methods},
-  year = {2024},
-  publisher = {Nature Publishing Group UK London},
-  url = {https://www.nature.com/articles/s41592-024-02499-w},
-  doi = {10.1038/s41592-024-02499-w}
+@article{zhao2025foundation,
+  title={A foundation model for joint segmentation, detection and recognition of biomedical objects across nine modalities},
+  author={Zhao, Theodore and Gu, Yu and Yang, Jianwei and Usuyama, Naoto and Lee, Ho Hin and Kiblawi, Sid and Naumann, Tristan and Gao, Jianfeng and Crabtree, Angela and Abel, Jacob and others},
+  journal={Nature methods},
+  volume={22},
+  number={1},
+  pages={166--176},
+  year={2025},
+  publisher={Nature Publishing Group US New York}
 }
 ```
 
