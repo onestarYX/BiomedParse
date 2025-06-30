@@ -9,6 +9,8 @@ This repository hosts the code and resources for the paper **"A Foundation Model
 ![Example Predictions](assets/readmes/biomedparse_prediction_examples.png)
 
 ## News
+- Jun. 30, 2025: We are updating the BiomedParse code and model with the [`v2`](https://github.com/microsoft/BiomedParse/tree/v2) branch. Stay tuned for future completion of the v2 code and model.
+- Jun. 11, 2025: BiomedParse is #1 in the [`CVPR 2025: Foundation Models for Text-guided 3D Biomedical Image Segmentation Challenge`](https://www.codabench.org/competitions/5651/)! We upgraded our model and finetuned on the challenge [`dataset`](https://huggingface.co/datasets/junma/CVPR-BiomedSegFM) with a wider and more comprehensive coverage for 3D biomedical imaging data. Checkout our model in containerized [`docker image`](https://drive.google.com/file/d/1eUAY1qvEzM0Ut0PA9BGp6gexn5TiFWj8/view?usp=sharing) for direct inference. Please acknowledge the original challenge if you use this version of the model.
 - Jan. 9, 2025: Refined all object recognition script and added notebook with examples.
 - Dec. 12, 2024: Uploaded extra datasets for finetuning on [[`Data`](https://huggingface.co/datasets/microsoft/BiomedParseData)]. Added random rotation feature for training.
 - Dec. 5, 2024: The loading process of target_dist.json is optimized by automatic downloading from HuggingFace.

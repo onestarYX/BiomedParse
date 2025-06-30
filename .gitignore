@@ -120,3 +120,4 @@ output
 #biomedparse_eval_results.json
 
 .amlignore*
+model_weights
