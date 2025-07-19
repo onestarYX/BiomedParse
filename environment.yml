@@ -107,7 +107,7 @@ dependencies:
       - cloudpickle==3.0.0
       - cython==3.0.2
       - deepspeed==0.10.3
-      - git+https://github.com/MaureenZOU/detectron2-xyz.git
+#      - git+https://github.com/MaureenZOU/detectron2-xyz.git
       - diffdist==0.1
       - einops==0.8.0
       - ftfy==6.1.1
@@ -120,7 +120,7 @@ dependencies:
       - iopath==0.1.9
       - json-tricks==3.17.3
       - kornia==0.7.0
-      - mpi4py==3.1.5
+#      - mpi4py==3.1.5  # install via conda
       - mup==1.0.0
       - mypy-extensions==1.0.0
       - ninja==1.11.1.1

@@ -121,3 +121,5 @@ output
 
 .amlignore*
 model_weights
+
+eval_output/

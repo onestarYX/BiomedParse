@@ -41,7 +41,7 @@ def interactive_infer_image(model, image, prompts):
     width = image.size[0]
     height = image.size[1]
     image_resize = np.asarray(image_resize)
-    image = torch.from_numpy(image_resize.copy()).permute(2,0,1).cuda()
+    image = torch.from_numpy(image_resize.copy()).permute(2,0,1).cuda()     # torch.uint8
 
     data = {"image": image, 'text': prompts, "height": height, "width": width}
     
