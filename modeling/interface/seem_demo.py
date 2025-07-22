@@ -213,6 +213,7 @@ class SEEMDecoder(nn.Module):
         src, pos, size_list = prepare_features(x, self.num_feature_levels, self.pe_layer, self.input_proj, self.level_embed)
         _, bs, _ = src[0].shape
 
+        # self.query_embed: (101, 512)---100 object queries + 1 global query
         # QxNxC
         query_embed = self.query_embed.weight.unsqueeze(1).repeat(1, bs, 1)
         output = self.query_feat.weight.unsqueeze(1).repeat(1, bs, 1)
@@ -298,7 +299,7 @@ class SEEMDecoder(nn.Module):
 
             self.attention_data.set('tokens_audio', 'tokens', grounding_tokens, _grounding_tokens)
             self.attention_data.set_maskings('tokens_audio', extra['audio_nonzero_mask'])
-
+        # output means embedding that accumuates during cross/self attention
         output, query_embed = self.attention_data.cross_attn_variables()
         # prediction heads on learnable query features
         results = self.forward_prediction_heads(output, mask_features, attn_mask_target_size=size_list[0])
@@ -362,7 +363,7 @@ class SEEMDecoder(nn.Module):
     def forward_prediction_heads(self, output, mask_features, attn_mask_target_size, layer_id=-1):
         decoder_output = self.decoder_norm(output)
         decoder_output = decoder_output.transpose(0, 1)
-        class_embed = decoder_output @ self.class_embed
+        class_embed = decoder_output @ self.class_embed     # TODO: what is this class_embed?
         outputs_class = self.lang_encoder.compute_similarity(class_embed)
         mask_embed = self.mask_embed(decoder_output)
         outputs_mask = torch.einsum("bqc,bchw->bqhw", mask_embed, mask_features)
@@ -377,6 +378,7 @@ class SEEMDecoder(nn.Module):
 
         # must use bool type
         # If a BoolTensor is provided, positions with ``True`` are not allowed to attend while ``False`` values will be unchanged.
+        # TODO: still don't understand when this attn_mask is used.
         attn_mask = (attn_mask.sigmoid().flatten(2).unsqueeze(1).repeat(1, self.num_heads, 1, 1).flatten(0, 1) < 0.5).bool()
         attn_mask = attn_mask.detach()
 

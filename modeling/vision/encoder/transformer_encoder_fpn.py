@@ -278,6 +278,8 @@ class TransformerEncoderPixelDecoder(BasePixelDecoder):
         num_cur_levels = 0
         
         # Reverse feature maps into top-down order (from low to high resolution)
+        # If it's lowest resolution (input feat map), conv(feat_d->512)->transformer->conv(512->512)--->y
+        # For other resolution, conv(feat_d->512)-> += resized_y -> conv(512->512)
         for idx, f in enumerate(self.in_features[::-1]):
             x = features[f]
             lateral_conv = self.lateral_convs[idx]

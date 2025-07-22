@@ -275,7 +275,7 @@ class GeneralizedSEEM(nn.Module):
         
         if 'text' in batched_inputs[0]:
             gtext = self.sem_seg_head.predictor.lang_encoder.get_text_token_embeddings(batched_inputs[0]['text'], name='grounding', token=False, norm=False)    # TODO: how does this work?
-            token_emb = gtext['token_emb']      # TODO: what does dim 1 mean?
+            token_emb = gtext['token_emb']      # (len_text_prompts, max_txt_token_len, embed_dim)
             tokens = gtext['tokens']
             query_emb = token_emb[tokens['attention_mask'].bool()]
             non_zero_query_mask = torch.zeros(query_emb[:,None].shape[:-1], dtype=torch.bool, device=query_emb.device)

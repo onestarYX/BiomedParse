@@ -218,7 +218,7 @@ sudo apt install docker-ce
 
 ## Prepare Docker Environment
 
-Specify the project directories in `docker/README.md`.
+Specify the project directories in `docker/README.md.md`.
 
 Run the following commands to set up the Docker environment:
 

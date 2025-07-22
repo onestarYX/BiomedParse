@@ -179,11 +179,11 @@ class LanguageEncoder(nn.Module):
             token_x = x['last_hidden_state']
 
             if self.tokenizer_type == 'clip':
-                class_x = token_x[torch.arange(token_x.size(0)), texts[0].argmax(dim=-1)]
+                class_x = token_x[torch.arange(token_x.size(0)), texts[0].argmax(dim=-1)]   # Get the CLS token
             else:
                 class_x = token_x[:, 0]
 
-        class_x = class_x @ self.lang_proj
+        class_x = class_x @ self.lang_proj  # TODO: where does this lang_proj come from?
         token_x = token_x @ self.lang_proj
 
         if norm:
@@ -196,7 +196,7 @@ class LanguageEncoder(nn.Module):
         if fake:
             return None
         v_emb = v_emb / (v_emb.norm(dim=-1, keepdim=True) + 1e-7)
-        t_emb = getattr(self, '{}_text_embeddings'.format(name))
+        t_emb = getattr(self, '{}_text_embeddings'.format(name))    # TODO: what is this default_text_embeddings???
         output = self.logit_scale.exp() * v_emb @ t_emb.unsqueeze(0).transpose(1, 2)
         return output
 

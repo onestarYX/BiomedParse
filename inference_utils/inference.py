@@ -3,6 +3,7 @@ import numpy as np
 import torch.nn.functional as F
 from PIL import Image
 from torchvision import transforms
+from scipy.optimize import linear_sum_assignment
 #from utils.visualizer import Visualizer
 # from detectron2.utils.colormap import random_color
 # from detectron2.data import MetadataCatalog
@@ -65,11 +66,16 @@ def interactive_infer_image(model, image, prompts):
 
     temperature = model.model.sem_seg_head.predictor.lang_encoder.logit_scale
     out_prob = vl_similarity(v_emb, t_emb, temperature=temperature)
-    
-    matched_id = out_prob.max(0)[1]
+
+    cost = -out_prob.cpu().numpy()
+    row_idx, col_idx = linear_sum_assignment(cost)
+    matched_id = np.empty(out_prob.size(1), dtype=int)
+    matched_id[col_idx] = row_idx
+
+    # matched_id = out_prob.max(0)[1]
+
     pred_masks_pos = pred_masks[matched_id,:,:]
     pred_class = results['pred_logits'][0][matched_id].max(dim=-1)[1]
-
     # interpolate mask to ori size
     pred_mask_prob = F.interpolate(pred_masks_pos[None,], (data['height'], data['width']), 
                                    mode='bilinear')[0,:,:data['height'],:data['width']].sigmoid().cpu().numpy()

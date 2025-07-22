@@ -12,7 +12,7 @@ if __name__ == "__main__":
     html_path = output_dir / 'eval_results.html'
     html_assets_dir = output_dir / 'html_assets'
     html_assets_dir.mkdir(parents=True, exist_ok=True)
-    results_input_dir = Path('eval_output/pannuke123')
+    results_input_dir = Path('eval_output/pannuke123_resolveMask')
     stats_path = results_input_dir / 'stats.pkl'
 
     with open(stats_path, "rb") as pickle_file:

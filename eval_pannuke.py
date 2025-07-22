@@ -1,5 +1,11 @@
 from PIL import Image
 import os, sys
+
+# Get the absolute path to the current file
+current_file = os.path.abspath(__file__)
+grandparent_dir = os.path.dirname(os.path.dirname(current_file))
+sys.path.insert(0, grandparent_dir)
+
 import argparse
 import torch
 import cv2
@@ -24,7 +30,7 @@ from BiomedParse.utilities.arguments import load_opt_from_config_files
 from BiomedParse.utilities.constants import BIOMED_CLASSES
 
 from BiomedParse.inference_utils.inference import interactive_infer_image
-from BiomedParse.inference_utils.output_processing import check_mask_stats
+from BiomedParse.inference_utils.output_processing import check_mask_stats, combine_masks
 
 
 def dice_score(mask1: np.ndarray, mask2: np.ndarray, eps: float = 1e-6) -> float:
@@ -75,7 +81,7 @@ def evaluate(
     # np.random.seed(19)
     # class_colors = (np.random.rand(len(class_names), 3) * 255).astype(np.uint8)
     class_colors = np.array([[255, 0, 0], [0, 255, 0], [0, 0, 255], [255, 255, 0], [0, 255, 255]])
-    if cfg.use_known_kw:
+    if "use_know_kw" in cfg and cfg.use_known_kw:
         text_prompts = ['neoplastic cells', 'inflammatory cells', 'connective tissue cells']
     else:
         text_prompts = ['neoplastic cells', 'inflammatory cells', 'connective tissue cells', 'dead cells',
@@ -94,7 +100,7 @@ def evaluate(
     class_dice_scores = {}
     for class_name in class_names:
         class_dice_scores[class_name] = []
-    image_dice_scores = {}
+    image_results = {}
     for data_iter_step, (images, inst_maps, type_maps, prompt_points, prompt_labels, prompt_cell_types,
                          cell_nums, ori_sizes, file_inds) in enumerate(epoch_iterator):
 
@@ -106,6 +112,15 @@ def evaluate(
         image = images[0].permute(1, 2, 0).numpy()
 
         pred_mask = interactive_infer_image(model, Image.fromarray(image), text_prompts)
+        prompt_mask = {k: pred_mask[i] for i, k in enumerate(text_prompts)}
+        resolved_mask = combine_masks(prompt_mask)
+
+        new_mask = np.zeros_like(pred_mask).astype(np.uint8)
+        for k, mask in resolved_mask.items():
+            idx = text_prompts.index(k)
+            new_mask[idx] = mask
+        pred_mask = new_mask
+
         # Resize mask to original shape
         pred_mask_resized = np.zeros((pred_mask.shape[0], 256, 256), dtype=pred_mask.dtype)
         for i in range(pred_mask.shape[0]):
@@ -120,17 +135,17 @@ def evaluate(
         pred_type_maps = [np.zeros((256, 256, 3), dtype=np.uint8) for _ in range(len(class_names))]
         image_resized = cv2.resize(image, (256, 256), interpolation=cv2.INTER_LINEAR)
         for i in range(len(class_names)):
-            if cfg.use_known_kw:
+            if "use_known_kw" in cfg and cfg.use_known_kw:
                if i >= 3:
                    break
             gt_type_mask = (type_maps.squeeze(0).cpu().numpy() == (i+1))
             pred_type_mask = pred_mask_resized[i]
             cur_dice_score = dice_score(pred_type_mask, gt_type_mask)
             class_dice_scores[class_names[i]].append(cur_dice_score)
-            if file_path.stem not in image_dice_scores:
-                image_dice_scores[file_path.stem] = {i: cur_dice_score}
+            if file_path.stem not in image_results:
+                image_results[file_path.stem] = {i: cur_dice_score}
             else:
-                image_dice_scores[file_path.stem][i] = cur_dice_score
+                image_results[file_path.stem][i] = cur_dice_score
 
             # Save segmentation images
             gt_type_map[gt_type_mask] = class_colors[i]
@@ -142,21 +157,23 @@ def evaluate(
         for i in range(len(class_names)):
             pred_type_maps[i] = (pred_type_maps[i].astype(float) * 0.5 + image_resized.astype(float) * 0.5).astype(np.uint8)
 
+        image_results[file_path.stem]['image'] = image_resized
+        image_results[file_path.stem]['gt_type_map'] = gt_type_map
+        image_results[file_path.stem]['pred_type_maps'] = pred_type_maps
+
         fig, ax = plt.subplots(1, 2 + len(class_names), figsize=(15, 3))
         ax[0].imshow(image_resized); ax[0].axis('off'); ax[0].set_title('Original Image')
         ax[1].imshow(gt_type_map); ax[1].axis('off'); ax[1].set_title('Ground Truth')
 
         legend_handles = []
         for i in range(len(class_names)):
-            if i >= 3:
-                break
             ax[i + 2].imshow(pred_type_maps[i]); ax[i + 2].axis('off')
-            ax[i + 2].set_title(f"{class_names[i]}: {image_dice_scores[file_path.stem][i]:.3f}")
+            ax[i + 2].set_title(f"{class_names[i]}: {image_results[file_path.stem][i]:.3f}")
             legend_handles.append(Patch(facecolor=(class_colors[i] / 255.0).tolist(), edgecolor='k', label=class_names[i]))
 
         fig.legend(handles=legend_handles, title="Classes")
 
-        # caption = get_dice_img_caption(image_dice_scores[file_path.stem])
+        # caption = get_dice_img_caption(image_results[file_path.stem])
         # fig.suptitle(caption)
         # plt.tight_layout()
         plt.savefig(output_dir / file_path.name)
@@ -170,7 +187,7 @@ def evaluate(
     # Save stats
     with open(output_dir / 'stats.pkl', 'wb') as f:
         pickle.dump(class_dice_scores, f)
-        pickle.dump(image_dice_scores, f)
+        pickle.dump(image_results, f)
 
 
     # Print table
@@ -232,7 +249,7 @@ if __name__ == "__main__":
     )
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    output_dir = Path('BiomedParse/eval_output/pannuke123_knownkw')
+    output_dir = Path('BiomedParse/eval_output/pannuke123_resolveMask')
     output_dir.mkdir(parents=True, exist_ok=True)
     evaluate(
         cfg,
