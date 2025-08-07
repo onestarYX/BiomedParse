@@ -71,21 +71,28 @@ def evaluate(
 ):
     model.eval()
 
-    class_names = [
-        "Neoplastic",   # 0
-        "Inflammatory", # 1
-        "Connective",   # 2
-        "Dead",         # 3
-        "Epithelial"    # 4
-    ]
     # np.random.seed(19)
     # class_colors = (np.random.rand(len(class_names), 3) * 255).astype(np.uint8)
-    class_colors = np.array([[255, 0, 0], [0, 255, 0], [0, 0, 255], [255, 255, 0], [0, 255, 255]])
-    if "use_know_kw" in cfg and cfg.use_known_kw:
-        text_prompts = ['neoplastic cells', 'inflammatory cells', 'connective tissue cells']
+    class_colors = np.array([[255, 0, 0], [0, 255, 0], [0, 0, 255], [0, 255, 255], [255, 255, 0]])
+    if cfg.evaluation.use_known_kw:
+        text_prompts = ['neoplastic cells', 'inflammatory cells', 'connective tissue cells',
+                        'epithelial cells']
+        class_names = [
+            "Neoplastic",  # 0
+            "Inflammatory",  # 1
+            "Connective",  # 2
+            "Epithelial",  # 3
+        ]
     else:
-        text_prompts = ['neoplastic cells', 'inflammatory cells', 'connective tissue cells', 'dead cells',
-                       'epithelial cells']
+        text_prompts = ['neoplastic cells', 'inflammatory cells', 'connective tissue cells',
+                       'epithelial cells', 'dead cells']
+        class_names = [
+            "Neoplastic",  # 0
+            "Inflammatory",  # 1
+            "Connective",  # 2
+            "Epithelial",  # 3
+            "Dead",  # 4
+        ]
 
     def get_dice_img_caption(dice_dict):
         msg = "DICE Scores: "
@@ -104,6 +111,8 @@ def evaluate(
     for data_iter_step, (images, inst_maps, type_maps, prompt_points, prompt_labels, prompt_cell_types,
                          cell_nums, ori_sizes, file_inds) in enumerate(epoch_iterator):
 
+        file_path = Path(test_loader.dataset.files[file_inds])
+
         assert len(images) == 1, 'batch size must be 1'
 
         epoch_iterator.set_description(
@@ -112,14 +121,20 @@ def evaluate(
         image = images[0].permute(1, 2, 0).numpy()
 
         pred_mask = interactive_infer_image(model, Image.fromarray(image), text_prompts)
-        prompt_mask = {k: pred_mask[i] for i, k in enumerate(text_prompts)}
-        resolved_mask = combine_masks(prompt_mask)
+        # prompt_mask = {k: pred_mask[i] for i, k in enumerate(text_prompts)}
+        # resolved_mask = combine_masks(prompt_mask)
+        #
+        # new_mask = np.zeros_like(pred_mask).astype(np.uint8)
+        # for k, mask in resolved_mask.items():
+        #     idx = text_prompts.index(k)
+        #     new_mask[idx] = mask
+        # pred_mask = new_mask
 
-        new_mask = np.zeros_like(pred_mask).astype(np.uint8)
-        for k, mask in resolved_mask.items():
-            idx = text_prompts.index(k)
-            new_mask[idx] = mask
-        pred_mask = new_mask
+        # By Theodore's suggestion, ignore masks with pvalue < 0.1
+        for i in range(pred_mask.shape[0]):
+            adj_pvalue = check_mask_stats(image, pred_mask[i] * 255, 'Pathology', text_prompts[i])
+            if adj_pvalue < 0.05:
+                pred_mask[i] = 0
 
         # Resize mask to original shape
         pred_mask_resized = np.zeros((pred_mask.shape[0], 256, 256), dtype=pred_mask.dtype)
@@ -129,15 +144,10 @@ def evaluate(
         pred_mask_resized = pred_mask_resized > confidence_threshold
 
         # Compute DICE score and store segmented outputs
-        file_path = Path(test_loader.dataset.files[file_inds])
         gt_type_map = np.zeros((256, 256, 3), dtype=np.uint8)
-        # pred_type_map = np.zeros((256, 256, 3), dtype=np.uint8)
         pred_type_maps = [np.zeros((256, 256, 3), dtype=np.uint8) for _ in range(len(class_names))]
         image_resized = cv2.resize(image, (256, 256), interpolation=cv2.INTER_LINEAR)
         for i in range(len(class_names)):
-            if "use_known_kw" in cfg and cfg.use_known_kw:
-               if i >= 3:
-                   break
             gt_type_mask = (type_maps.squeeze(0).cpu().numpy() == (i+1))
             pred_type_mask = pred_mask_resized[i]
             cur_dice_score = dice_score(pred_type_mask, gt_type_mask)
@@ -176,7 +186,8 @@ def evaluate(
         # caption = get_dice_img_caption(image_results[file_path.stem])
         # fig.suptitle(caption)
         # plt.tight_layout()
-        plt.savefig(output_dir / file_path.name)
+        fig_output_path = output_dir / file_path.name
+        plt.savefig(fig_output_path)
         plt.close(fig)
 
 
@@ -209,7 +220,7 @@ if __name__ == "__main__":
     parser.add_argument('--ckpt', type=str,
                         default="BiomedParse/checkpoints/biomedparse_v1.pt")
     parser.add_argument('--config', type=str,
-                        default="configs/promptnucseg_pannuke123_seg.yaml")
+                        default="BiomedParse/configs/biomed_pannuke.yaml")
     args, extras = parser.parse_known_args()
 
     ckpt_path = Path(args.ckpt)
@@ -249,7 +260,7 @@ if __name__ == "__main__":
     )
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    output_dir = Path('BiomedParse/eval_output/pannuke123_resolveMask')
+    output_dir = Path(cfg.evaluation.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     evaluate(
         cfg,

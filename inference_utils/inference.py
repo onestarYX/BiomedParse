@@ -67,12 +67,12 @@ def interactive_infer_image(model, image, prompts):
     temperature = model.model.sem_seg_head.predictor.lang_encoder.logit_scale
     out_prob = vl_similarity(v_emb, t_emb, temperature=temperature)
 
-    cost = -out_prob.cpu().numpy()
-    row_idx, col_idx = linear_sum_assignment(cost)
-    matched_id = np.empty(out_prob.size(1), dtype=int)
-    matched_id[col_idx] = row_idx
+    # cost = -out_prob.cpu().numpy()
+    # row_idx, col_idx = linear_sum_assignment(cost)
+    # matched_id = np.empty(out_prob.size(1), dtype=int)
+    # matched_id[col_idx] = row_idx
 
-    # matched_id = out_prob.max(0)[1]
+    matched_id = out_prob.max(0)[1]
 
     pred_masks_pos = pred_masks[matched_id,:,:]
     pred_class = results['pred_logits'][0][matched_id].max(dim=-1)[1]
