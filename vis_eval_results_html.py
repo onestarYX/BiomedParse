@@ -1,7 +1,7 @@
 import os, sys
 from pathlib import Path
 import pickle
-from html_utils import *
+from ..html_tools.html_utils import *
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy.stats import gaussian_kde
